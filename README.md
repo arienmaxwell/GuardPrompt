@@ -1,4 +1,4 @@
-# 🛡️ Prompt Guard AI (Apple Silicon Edition)
+# 🛡️ Prompt Guard AI
 
 This local Gradio app demonstrates prompt-injection and data-leakage mitigation using:
 - **Guard LLM:** `meta-llama/Meta-Llama-3-1B-Instruct`
