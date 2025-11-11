@@ -31,29 +31,60 @@ except Exception:
     _SPACY_AVAILABLE = False
     _NLP = None
 
-# Default Policy
 DEFAULT_POLICY = {
     "max_prompt_tokens": 4000,
+
+    # Keywords that often imply sensitive or private data
     "disallowed_keywords": [
-        "ssh_private_key", "-----BEGIN PRIVATE KEY-----", "PASSWORD=",
-        "API_KEY", "SECRET", "token:", "bearer ", "private_key",
-        "/etc/passwd", "send all files"
+        "ssh_private_key", "-----BEGIN PRIVATE KEY-----",
+        "PASSWORD=", "API_KEY", "SECRET", "bearer ",
+        "token:", "private_key", "/etc/passwd", "send all files",
+        "salary", "income", "payroll", "employee_id",
+        "employee number", "reg_no", "registration number",
+        "phone", "mobile", "contact number", "credit card",
+        "iban", "account number", "aadhar", "aadhaar"
     ],
+
+    # Sensitive data patterns (regex-based redaction)
     "sensitive_regexes": [
-        r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+",  # Email
-        r"(?:[A-Za-z]\:)?(?:\\|/)(?:[\w\-\s\.]+(?:\\|/))*[\w\-\s\.]+",  # File path
-        r"[A-Fa-f0-9]{32,}",  # Long hex (API keys)
-        r"\b(?:\d{1,3}\.){3}\d{1,3}\b"  # IP address
+
+        # Personal Identifiers
+        r"[A-Z]{5}\d{4}[A-Z]",                                   # Indian PAN
+        r"\b\d{4}\s?\d{4}\s?\d{4}\b",                             # Aadhaar (12 digits)
+        r"\b\d{10}\b",                                            # Generic 10-digit number (Phone / Employee ID)
+        r"\bEMP\d{3,6}\b",                                        # Employee Number e.g. EMP12345
+        r"\b22BCE\d{4}\b",                                        # Student Reg No (VIT Format)
+        r"\bREG\d{4,8}\b",                                        # Generic Registration Number
+
+        # Financial
+        r"\b\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}\b",               # Credit/Debit Card
+        r"\b[A-Z]{2}\d{2}[A-Z0-9]{1,30}\b",                       # IBAN
+        r"\b\d{9,18}\b",                                          # Bank Account Numbers
+        r"₹\s?\d{1,3}(?:,\d{3})*(?:\.\d{2})?",                    # Salary with currency symbol
+        r"\b\d{1,3}(?:,\d{3})*(?:\.\d{2})?\s?(?:INR|USD|EUR)\b",  # Salary with currency code
+
+        # Digital / Network IDs
+        r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+",         # Email
+        r"\b(?:\d{1,3}\.){3}\d{1,3}\b",                            # IP Address
+        r"(?:[A-Za-z]\:)?(?:\\|/)(?:[\w\-\s\.]+(?:\\|/))*[\w\-\s\.]+", # File Paths
+
+        # Keys / Hashes
+        r"[A-Fa-f0-9]{32,}",                                      # Long hex strings (API keys)
+        r"[A-Za-z0-9+/]{40,}={0,2}",                              # Base64 strings (encoded secrets)
     ],
+
+    # Words or phrases that immediately flag prompt injection
     "block_if_contains": [
         "exfiltrate", "ignore previous instructions", "upload all content",
-        "send all files", "download /", "open /etc", "output the contents of"
+        "download /", "open /etc", "output the contents of", "print your system prompt"
     ],
+
     "allow_after_redaction": True,
     "max_redactions": 10,
     "min_risk_to_block": 75,
     "min_risk_to_review": 40
 }
+
 
 # Normalization
 _INVISIBLE_CHARS = ["\u200b", "\u200c", "\u200d", "\ufeff", "\u2060"]
