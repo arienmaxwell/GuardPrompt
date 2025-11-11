@@ -1,4 +1,6 @@
-# 🛡️ GuardPrompt - Prompt Injection and Data Leakage Guard using LLMs
+# 🛡️ GuardPrompt 
+
+Prompt Injection and Data Leakage Guard using LLMs
 
 This local Gradio app demonstrates prompt-injection and data-leakage mitigation using:
 - **Guard LLM:** `meta-llama/Meta-Llama-3-1B-Instruct`
